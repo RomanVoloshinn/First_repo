@@ -1,0 +1,111 @@
+#1 Задание
+from datetime import datetime
+
+def get_days_from_today(date):
+    try:
+        input_date = datetime.strptime(date, '%Y-%m-%d')
+
+        current_date = datetime.today()
+
+        date_difference = current_date - input_date
+
+        return date_difference.days
+    except ValueError:
+        return
+
+
+result = get_days_from_today('2022-03-06')
+print(result)
+
+
+#2 Задание
+import random
+
+def get_numbers_ticket(min_num, max_num, quantity):
+    if not (1 <= min_num <= max_num <= 1000) or not (min_num <= quantity <= max_num):
+        return []
+
+    unique_numbers = set()
+    while len(unique_numbers) < quantity:
+        unique_numbers.add(random.randint(min_num, max_num))
+
+    return sorted(list(unique_numbers))
+
+min_value = 1
+max_value = 49
+quantity_to_select = 6
+result_numbers = get_numbers_ticket(min_value, max_value, quantity_to_select)
+print(result_numbers)
+
+
+
+
+#3 Задание
+import re
+
+def normalize_phone(phone_number):
+    cleaned_number = re.sub(r'[^0-9+]', '', phone_number)
+
+    if not cleaned_number.startswith('+'):
+        cleaned_number = '+38' + cleaned_number
+
+    return cleaned_number
+
+phone1 = "    +38(050)123-32-34"
+phone2 = "     0503451234"
+phone3 = "(050)8889900"
+phone4 = "38050-111-22-22"
+phone5 = "38050 111 22 11   "
+
+print(normalize_phone(phone1))
+print(normalize_phone(phone2))
+print(normalize_phone(phone3))
+print(normalize_phone(phone4))
+print(normalize_phone(phone5))
+
+
+#4 задание
+from datetime import datetime, timedelta
+
+def get_upcoming_birthdays(users):
+    today = datetime.today().date()
+    upcoming_birthdays = []
+
+    for user in users:
+        birthday = datetime.strptime(user["birthday"], "%Y.%m.%d").date()
+
+        if birthday < today:
+            birthday = birthday.replace(year=today.year + 1)
+
+        days_until_birthday = (birthday - today).days
+
+        if 0 <= days_until_birthday <= 6:
+            if birthday.weekday() >= 5:
+                weekday_difference = 7 - birthday.weekday()
+                birthday += timedelta(days=weekday_difference)
+
+            upcoming_birthdays.append({
+                "name": user["name"],
+                "congratulation_date": birthday.strftime("%Y.%m.%d")
+            })
+
+    return upcoming_birthdays
+
+
+users = [
+    {"name": "Роман", "birthday": "2024.03.15"},
+    {"name": "Анастасия", "birthday": "2024.03.10"},
+]
+
+result = get_upcoming_birthdays(users)
+print(result)
+
+
+
+
+
+
+
+
+
+
