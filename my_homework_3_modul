@@ -39,6 +39,19 @@ print("Ваші лотерейні числа:", lottery_numbers)
 #3 Задание
 import re
 
+
+def normalize_phone(phone_number):
+    cleaned_number = re.sub(r'[^0-9+]', '', phone_number)
+
+    if not cleaned_number.startswith('+'):
+        if cleaned_number.startswith('380'):
+            cleaned_number = '+' + cleaned_number
+        else:
+            cleaned_number = "+38" + cleaned_number
+
+    return cleaned_number
+
+
 phones = [
     "    +38(050)123-32-34",
     "     0503451234",
@@ -48,15 +61,7 @@ phones = [
 ]
 
 for phone in phones:
-    cleaned_number = re.sub(r'[^0-9+]', '', phone)
-
-    if not cleaned_number.startswith('+'):
-        if cleaned_number.startswith('380'):
-            cleaned_number = '+' + cleaned_number
-        else:
-            cleaned_number = "+38" + cleaned_number
-
-    print(cleaned_number)
+    print(normalize_phone(phone))
 
 
 
