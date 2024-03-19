@@ -105,7 +105,7 @@ def main():
     print("Ласкаво просимо до асистента!")
     while True:
         user_input = input("Введіть команду: ")
-        command, *args = parse_input(user_input)
+        command, args = parse_input(user_input)
         if command in ["close", "exit"]:
             print("До побачення!")
             break
