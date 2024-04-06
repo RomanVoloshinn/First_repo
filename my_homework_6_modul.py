@@ -1,84 +1,78 @@
-def input_error(func):
-    def inner(*args, **kwargs):
-        try:
-            return func(*args, **kwargs)
-        except KeyError:
-            return "Помилка: Контакт не знайдено."
-        except ValueError:
-            return "Помилка: Введіть ім'я та телефон."
-        except IndexError:
-            return "Помилка: Недостатньо аргументів."
+class Field:
+    def __init__(self, value):
+        self.value = value
 
-    return inner
+    def __str__(self):
+        return str(self.value)
 
-def parse_input(user_input):
-    if user_input:
-        cmd, *args = user_input.split()
-        cmd = cmd.strip().lower()
-        return cmd, args
-    else:
-        return None, []
+class Name(Field):
+    pass
 
-@input_error
-def add_contact(args, contacts):
-    if len(args) >= 2:
-        name, phone = args
-        contacts[name] = phone
-        return "Контакт додано."
-    else:
-        raise ValueError
+class Phone(Field):
+    def __init__(self, value):
+        if not value.isdigit() or len(value) != 10:
+            raise ValueError("Phone number should contain exactly 10 digits.")
+        super().__init__(value)
 
-@input_error
-def change_contact(args, contacts):
-    if len(args) >= 2:
-        name, new_phone = args
-        if name in contacts:
-            contacts[name] = new_phone
-            return f"Номер телефону для '{name}' змінено."
-        else:
-            raise KeyError
-    else:
-        raise IndexError
+class Record:
+    def __init__(self, name):
+        self.name = Name(name)
+        self.phones = []
 
-@input_error
-def get_phone(args, contacts):
-    if args:
-        name = args[0]
-        if name in contacts:
-            return f"Номер телефону для '{name}' - {contacts[name]}."
-        else:
-            raise KeyError
-    else:
-        raise ValueError
+    def add_phone(self, phone):
+        self.phones.append(Phone(phone))
 
-def display_all_contacts(contacts):
-    if contacts:
-        all_contacts = "\n".join([f"{name}: {phone}" for name, phone in contacts.items()])
-        return f"Усі контакти:\n{all_contacts}"
-    else:
-        return "Контакти відсутні."
+    def remove_phone(self, phone):
+        self.phones = [p for p in self.phones if str(p) != phone]
 
-def main():
-    contacts = {}
-    print("Ласкаво просимо до асистента!")
-    while True:
-        user_input = input("Введіть команду: ")
-        command, args = parse_input(user_input)
-        if command in ["close", "exit"]:
-            print("До побачення!")
-            break
-        elif command == "hello":
-            print("Як я можу вам допомогти?")
-        elif command == "add":
-            print(add_contact(args, contacts))
-        elif command == "change":
-            print(change_contact(args, contacts))
-        elif command == "phone":
-            print(get_phone(args, contacts))
-        elif command == "all":
-            print(display_all_contacts(contacts))
-        else:
-            print("Невірна команда.")
+    def edit_phone(self, old_phone, new_phone):
+        self.remove_phone(old_phone)
+        self.add_phone(new_phone)
 
-if __name__ == "__main__":
-    main()
+    def find_phone(self, phone):
+        for p in self.phones:
+            if str(p) == phone:
+                return p
+        return None
+
+    def __str__(self):
+        return f"Contact name: {self.name.value}, phones: {'; '.join(str(p) for p in self.phones)}"
+
+class AddressBook:
+    def __init__(self):
+        self.data = {}
+
+    def add_record(self, record):
+        self.data[record.name.value] = record
+
+    def find(self, name):
+        return self.data.get(name)
+
+    def delete(self, name):
+        if name in self.data:
+            del self.data[name]
+
+book = AddressBook()
+
+john_record = Record("John")
+john_record.add_phone("1234567890")
+john_record.add_phone("5555555555")
+
+book.add_record(john_record)
+
+jane_record = Record("Jane")
+jane_record.add_phone("9876543210")
+book.add_record(jane_record)
+
+for name, record in book.data.items():
+    print(record)
+
+john = book.find("John")
+john.edit_phone("1234567890", "1112223333")
+
+print(john)
+
+found_phone = john.find_phone("5555555555")
+print(f"{john.name}: {found_phone}")
+
+book.delete("Jane")
