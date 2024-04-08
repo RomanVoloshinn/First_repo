@@ -1,3 +1,5 @@
+from collections import UserDict
+
 class Field:
     def __init__(self, value):
         self.value = value
@@ -26,6 +28,8 @@ class Record:
         self.phones = [p for p in self.phones if str(p) != phone]
 
     def edit_phone(self, old_phone, new_phone):
+        if old_phone not in [str(p) for p in self.phones]:
+            raise ValueError("The phone number you are trying to edit does not exist.")
         self.remove_phone(old_phone)
         self.add_phone(new_phone)
 
@@ -38,10 +42,7 @@ class Record:
     def __str__(self):
         return f"Contact name: {self.name.value}, phones: {'; '.join(str(p) for p in self.phones)}"
 
-class AddressBook:
-    def __init__(self):
-        self.data = {}
-
+class AddressBook(UserDict):
     def add_record(self, record):
         self.data[record.name.value] = record
 
