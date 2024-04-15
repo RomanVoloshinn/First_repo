@@ -154,7 +154,7 @@ def main():
                 print(f"Contact {name} not found")
         elif command == "all":
             print("All contacts:")
-            for name, record in book.data.items():
+            for name, record in book.records:
                 print(f"{name}: {', '.join(record.phones)}")
         elif command == "add-birthday":
             add_birthday(args, book)
