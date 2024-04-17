@@ -1,12 +1,18 @@
-
 from datetime import datetime, timedelta
 import re
 
+class Field:
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return str(self.value)
+
 # Классы для обработки данных о дате рождения, телефонном номере и записи контакта
-class Birthday:
+class Birthday(Field):
     def __init__(self, value):
         try:
-            self.value = datetime.strptime(value, "%d.%m.%Y")
+            super().__init__(datetime.strptime(value, "%d.%m.%Y"))
         except ValueError:
             raise ValueError("Invalid date format. Use DD.MM.YYYY")
 
@@ -22,30 +28,35 @@ class Record:
     def add_phone(self, phone):
         self.phones.append(Phone(phone))
 
-class Phone:
+    def __str__(self):
+        phones_info = ", ".join([str(phone) for phone in self.phones])
+        return f"Name: {self.name} Birthday: {self.birthday} Phones: {phones_info}"
+
+class Phone(Field):
     def __init__(self, value):
         if not re.match(r'^\+?\d{1,3}?\s?\(?(?:\d{2,3})\)?(?:[-.\s]?\d{2,3}){2,3}$', value):
             raise ValueError("Invalid phone number format.")
+        super().__init__(value)
+
+    def __str__(self):
+        return str(self.value)
 
 # Класс для управления записями контактов
 class AddressBook:
     def __init__(self):
-        self.records = []
+        self.records = dict()
 
     def add_record(self, record):
-        self.records.append(record)
+        self.records.update({record.name : record})
 
     def find(self, name):
-        for record in self.records:
-            if record.name == name:
-                return record
-        return None
+        return self.records.get(name)
 
     def get_upcoming_birthdays(self):
         today = datetime.today().date()
         upcoming_birthdays = []
 
-        for record in self.records:
+        for record in self.records.values():
             if record.birthday:
                 birthday = record.birthday.value
                 birthday = birthday.replace(year=today.year).date()
@@ -132,16 +143,16 @@ def main():
                 book.add_record(record)
                 print(f"Added new contact {name} with phone {phone}")
         elif command == "change":
-            if len(args) != 2:
-                print("Usage: change [name] [new phone]")
-                continue
-            name, new_phone = args
-            record = book.find(name)
-            if record:
-                record.change_phone(new_phone)
-                print(f"Changed phone for {name} to {new_phone}")
-            else:
-                print(f"Contact {name} not found")
+                if len(args) != 2:
+                    print("Usage: change [name] [new phone]")
+                    continue
+                name, new_phone = args
+                record = book.find(name)
+                if record:
+                    record.phones = [new_phone]
+                    print(f"Changed phone for {name} to {new_phone}")
+                else:
+                    print(f"Contact {name} not found")
         elif command == "phone":
             if len(args) != 1:
                 print("Usage: phone [name]")
@@ -149,23 +160,21 @@ def main():
             name = args[0]
             record = book.find(name)
             if record:
-                print(f"Phone for {name}: {record.phone}")
+                print(f"Phone for {name}: {record.phones}")
             else:
                 print(f"Contact {name} not found")
         elif command == "all":
-            print("All contacts:")
-            for name, record in book.records:
-                print(f"{name}: {', '.join(record.phones)}")
+                print("All contacts:")
+                for name, record in book.records.items():
+                    print(record)
         elif command == "add-birthday":
-            add_birthday(args, book)
+            print(add_birthday(args, book))
         elif command == "show-birthday":
-            show_birthday(args, book)
+            print(show_birthday(args, book))
         elif command == "birthdays":
-            birthdays(args, book)
+            print(birthdays(book))
         else:
             print("Invalid command.")
 
 if __name__ == '__main__':
     main()
-
-
